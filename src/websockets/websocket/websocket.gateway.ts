@@ -8,7 +8,7 @@ import {
   WebSocketServer,
   WsResponse,
 } from '@nestjs/websockets';
-import { Observable, from, map } from 'rxjs';
+import { from, map, Observable } from 'rxjs';
 import { Server, Socket } from 'socket.io';
 
 @WebSocketGateway({
@@ -41,7 +41,9 @@ export class WebsocketGateway
 
     console.log(data);
     console.log(from(response).pipe(map((data) => ({ event, data }))));
-    return from(response).pipe(map((data) => (console.log({event, data}), {event, data})));
+    return from(response).pipe(
+      map((data) => (console.log({ event, data }), { event, data })),
+    );
   }
 
   @SubscribeMessage('identity')
