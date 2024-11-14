@@ -15,6 +15,7 @@ import { Server, Socket } from 'socket.io';
   cors: {
     origin: '*',
   },
+  transports: ['websocket'],
 })
 export class WebsocketGateway
   implements OnGatewayConnection, OnGatewayDisconnect
@@ -23,7 +24,7 @@ export class WebsocketGateway
   server: Server;
 
   handleConnection(client: Socket) {
-    console.log('Client connected', client.id);
+    console.log('Client connected from server', client.id);
   }
 
   handleDisconnect(client: Socket) {
@@ -38,16 +39,17 @@ export class WebsocketGateway
     client.broadcast.emit('eventsServer', data);
     const event = 'events';
     const response = [1, 2, 3];
-
-    console.log(data);
-    console.log(from(response).pipe(map((data) => ({ event, data }))));
     return from(response).pipe(
       map((data) => (console.log({ event, data }), { event, data })),
     );
   }
 
   @SubscribeMessage('identity')
-  async identity(@MessageBody() data: number): Promise<number> {
+  async identity(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: number,
+  ): Promise<number> {
+    client.broadcast.emit('eventsServer', data);
     return data;
   }
 }
